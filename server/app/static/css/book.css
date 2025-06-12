@@ -1,0 +1,149 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.book-container {
+    max-width: 1200px;
+    margin: 2rem;
+}
+
+.book-container h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.toc-item {
+    margin-left: calc(1.5rem * var(--level));
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    background-color: white;
+    transition: all 0.3s ease;
+}
+
+.toc-link {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+}
+
+.toc-link:hover {
+    background-color: #e9ecef;
+}
+
+.toc-link::after {
+    content: '\25BC';
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.toc-link.collapsed::after {
+    transform: rotate(180deg);
+}
+
+.paragraph-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.content-container {
+    display: none;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    border-radius: 0 0 0.25rem 0.25rem;
+}
+
+.content-container.active {
+    display: block;
+}
+
+.paragraph-container {
+    position: relative;
+    border-left: 4px solid #4a90e2;
+    /* A modern blue shade for the left border */
+    padding-left: 5px;
+    /* Space between border and content for better readability */
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow to enhance border prominence */
+    margin-bottom: 20px;
+    /* Spacing between containers for clarity */
+}
+
+.card {
+    margin-bottom: 0.5rem;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.pali-text {
+    margin-bottom: 0.5rem;
+}
+
+.translation-text {
+    color: #555;
+}
+
+.translation2-text {
+    color: #07922a;
+    margin-top: 0.5rem;
+}
+
+/* for select book parts */
+/* Styling for the combobox row */
+.book-container .row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.form-select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    outline: none;
+}
+
+.btn-primary {
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.select2-container--default .select2-selection--single {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    height: 38px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
+}

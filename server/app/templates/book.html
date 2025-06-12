@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ book_name }} ({{ channel_name }})</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="/static/css/book.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="book-container">
+        <h1>{{ book_name }} ({{ channel_name }})</h1>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <select id="bookSelect" class="form-select select2" style="width: 100%;">
+                    <option value="">Select a book</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="scriptSelect" class="form-select">
+                    <option value="">Select script</option>
+                    <option value="Sinh">Sinhala</option>
+                    <option value="Deva">Devanagari</option>
+                    <option value="Latn">Roman/Latin</option>
+                    <option value="Thai">Thai</option>
+                    <option value="Laoo">Lao</option>
+                    <option value="Mymr">Myanmar</option>
+                    <option value="Khmr">Khmer</option>
+                    <option value="Beng">Bengali</option>
+                    <option value="Guru">Gurmukhi</option>
+                    <option value="Lana">Tai Tham</option>
+                    <option value="Gujr">Gujarati</option>
+                    <option value="Telu">Telugu</option>
+                    <option value="Knda">Kannada</option>
+                    <option value="Mlym">Malayalam</option>
+                    <option value="Brah">Brahmi</option>
+                    <option value="Tibt">Tibetan</option>
+                    <option value="Cyrl">Cyrillic</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="channelSelect" class="form-select">
+                    <option value="">Select translation</option>
+                    <option value="652033bb-8cc0-4399-bf73-35c1d709cffa">Gemini Bhāsāṭīka Literal Translation</option>
+                    <option value="55dfe318-59e6-4c48-bba8-bd6b293af2df">Gemini Bhāsāṭīka Free Translation</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button id="submitButton" class="btn btn-primary w-100">Submit</button>
+            </div>
+        </div>
+        <div id="toc-list"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/book.js"></script>
+    <script>
+        const bookId = "{{ book_id }}";
+        const channelId = "{{ channel_id }}";
+        const channel2Id = "{{ channel2_id }}";
+        const scriptLang = "{{script_lang}}";
+
+        // Function to get URL query parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        $(document).ready(function () {
+            // Initialize Select2 for book selection
+            $('#bookSelect').select2({
+                placeholder: "Select a book",
+                allowClear: true
+            });
+
+            // Get query parameters from URL
+            const bookFromUrl = bookId || getQueryParam('book');
+            const scriptFromUrl = getQueryParam('script') || scriptLang;
+            const channel2FromUrl = getQueryParam('channel2') || channel2Id;
+
+            // Fetch books from API and populate book combobox
+            $.getJSON('http://localhost:5000/api/books/7a9b2e4f-6d8c-4b1a-9e3f-82c4d7f105a9', function (data) {
+                $.each(data, function (index, book) {
+                    $('#bookSelect').append(
+                        $('<option>', {
+                            value: book.book,
+                            text: book.name
+                        })
+                    );
+                });
+                // Set book selection from URL if available
+                if (bookFromUrl) {
+                    $('#bookSelect').val(bookFromUrl).trigger('change');
+                }
+            });
+
+            // Set script selection from URL if available
+            if (scriptFromUrl) {
+                $('#scriptSelect').val(scriptFromUrl);
+            }
+
+            // Set channel selection from URL if available
+            if (channel2FromUrl) {
+                $('#channelSelect').val(channel2FromUrl);
+            }
+
+            // Handle submit button click
+            $('#submitButton').click(function () {
+                const bookId = $('#bookSelect').val();
+                const scriptId = $('#scriptSelect').val();
+                const channel2Id = $('#channelSelect').val();
+
+                if (bookId && scriptId && channel2Id) {
+                    const url = `/book/${bookId}/7a9b2e4f-6d8c-4b1a-9e3f-82c4d7f105a9?script=${scriptId}&channel2=${channel2Id}`;
+                    window.location.href = url;
+                } else {
+                    alert('Please select a book, script, and translation.');
+                }
+            });
+
+            loadTOC(bookId);
+        });
+    </script>
+</body>
+
+</html>

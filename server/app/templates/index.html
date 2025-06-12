@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Nissaya Translation Viewer</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tocSidebar"
+            aria-controls="tocSidebar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="static/css/styles.css">
+
+<div class="container-fluid" style="padding-top: 56px;">
+    <div class="row">
+        <nav id="tocSidebar" class="col-md-3 col-lg-2 bg-light sidebar collapse navbar-collapse">
+            <div class="sidebar-sticky pt-3">
+                <h4 class="sidebar-heading">Table of Contents</h4>
+                <div id="toc-content">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#section1">Section 1</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#section2">Section 2</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#section3">Section 3</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container">
+            <div class="selection-controls">
+                <div class="selection-tabs">
+                    <div class="tab {% if not selected_book or (selected_channel and selected_book) %}active{% endif %}"
+                        data-tab="channel-first">Select Channel First</div>
+                    <div class="tab {% if selected_book and not selected_channel %}active{% endif %}"
+                        data-tab="book-first">Select Book First</div>
+                </div>
+
+                <div id="channel-first"
+                    class="tab-content {% if not selected_book or (selected_channel and selected_book) %}active{% endif %}">
+                    <form id="channel-first-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="channel-select">Select Channel:</label>
+                                <select id="channel-select" name="channel" class="form-select">
+                                    <option value="">Select a channel</option>
+                                    {% for channel in channels %}
+                                    <option value="{{ channel.id }}" {% if selected_channel|string==channel.id|string %}selected{%
+                                        endif %}>
+                                        {{ channel.name }} - ({{ channel.lines_count}} lines)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="book-select-by-channel">Select Book:</label>
+                                <select id="book-select-by-channel" name="book" class="form-select">
+                                    <option value="">Select a book</option>
+                                    {% if channel_books %}
+                                    {% for book in channel_books %}
+                                    <option value="{{ book.book }}" {% if selected_book|string==book.book|string
+                                        %}selected{% endif %}>
+                                        {{ book.book }} - {{ book.name }} ({{ book.lines_count }} lines)
+                                    </option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <div id="loading-channel-books" class="loading">Loading books...</div>
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <button type="submit" class="btn btn-primary">View Translations</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="book-first"
+                    class="tab-content {% if selected_book and not selected_channel %}active{% endif %}">
+                    <form id="book-first-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="book-select">Select Book:</label>
+                                <select id="book-select" name="book" class="form-select">
+                                    <option value="">Select a book</option>
+                                    {% for book in all_books %}
+                                    <option value="{{ book.book_id }}" {% if selected_book|string==book.book_id|string
+                                        %}selected{% endif %}>
+                                        {{ book.book_id }} - {{ book.book_name }} ({{ book.lines_count }} lines)
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="channel-select-by-book">Select Channel:</label>
+                                <select id="channel-select-by-book" name="channel" class="form-select">
+                                    <option value="">Select a channel</option>
+                                    {% if book_channels %}
+                                    {% for channel in book_channels %}
+                                    <option value="{{ channel.id }}" {% if selected_channel==channel.id %}selected{%
+                                        endif %}>
+                                        {{ channel.name }} - ({{channel.lines_count}} lines)
+                                    </option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <div id="loading-book-channels" class="loading">Loading channels...</div>
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <button type="submit" class="btn btn-primary">View Translations</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if selected_channel and selected_book %}
+            <div class="book-info">
+                <h2>
+                    <span class="info-label">Book:</span>
+                    <span class="info-value">{{ book_name or selected_book }}</span>
+                </h2>
+                <h2>
+                    <span class="info-label">Channel:</span>
+                    <span class="info-value">{{ channel_name }}</span>
+                </h2>
+            </div>
+
+            <div id="translations-container">
+            </div>
+            <div id="loading-translations" class="loading">Loading more...</div>
+            {% elif not selected_channel and not selected_book %}
+            <div class="empty-block text-center">
+                <h3>Welcome to the Nissaya Translation Viewer</h3>
+                <p>Please select a book and channel to view translations</p>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="static/js/script.js"></script>
+{% endblock %}

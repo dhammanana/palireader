@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+:root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --bg-sidebar: 0 0% 100%;
+}
+
+.dark {
+    --background: 222.2 84% 4.9%;
+    /* Dark mode: dark gray */
+    --foreground: 210 40% 98%;
+    --bg-sidebar: 222.2 84% 4.9%;
+}
+
+.bg-background {
+    background-color: hsl(var(--background));
+}

@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run translate.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/services/translate.py",
+            "program1": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "python": "${workspaceFolder}/../env/bin/python",
+            "args1": [
+                "run",
+                "--no-reload" // Disables debugpy's reloader conflict
+            ],
+            "args": [
+                "--book",
+                "139",
+                "--channel",
+                "136fcd1a-3ef1-432c-8cfa-51eec1b68211",
+                "--lang",
+                "vi"
+            ],
+            "jinja": true,
+            "justMyCode": false
+        }
+    ]
+}

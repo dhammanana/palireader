@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipitaka Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Layout Component
+        const Layout = ({ children }) => {
+            const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+            return (
+                <div className="min-h-screen">
+                    {/* Navbar */}
+                    <nav className="fixed top-0 left-0 right-0 bg-white shadow-md p-4 z-10 flex justify-between items-center">
+                        <h1 className="text-xl font-bold">Tipitaka Viewer</h1>
+                        <div className="flex space-x-4">
+                            <button
+                                className="p-2 hover:bg-gray-200 rounded"
+                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* Sidebar */}
+                    <div
+                        className={`fixed top-16 left-0 h-full w-64 bg-white border-r transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                    >
+                        <Sidebar />
+                    </div>
+
+                    {/* Main Content */}
+                    <main className={`transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'} pt-20 p-6`}>
+                        {children}
+                    </main>
+                </div>
+            );
+        };
+
+        // Sidebar Component
+        const Sidebar = () => {
+            const [toc, setToc] = useState([]);
+            const [bookId, setBookId] = useState('1'); // Default book ID
+
+            useEffect(() => {
+                axios.get(`http://localhost:5000/api/toc/${bookId}`)
+                    .then(response => setToc(response.data))
+                    .catch(error => console.error('Error fetching TOC:', error));
+            }, [bookId]);
+
+            return (
+                <div className="p-4 overflow-y-auto h-full">
+                    <h2 className="text-lg font-bold mb-4">Tree View</h2>
+                    {toc.map(item => (
+                        <TOCItem key={item.paragraph} item={item} />
+                    ))}
+                </div>
+            );
+        };
+
+        // TOC Item Component (Recursive)
+        const TOCItem = ({ item }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [content, setContent] = useState(null);
+            const channelId = '1'; // Default channel ID
+
+            const fetchContent = () => {
+                const paragraphEnd = parseInt(item.paragraph) + (item.chapter_len || 1) - 1;
+                axios.get(`http://localhost:5000/api/toc/content/${item.book_id}/${channelId}`, {
+                    params: {
+                        paragraph_start: item.paragraph,
+                        paragraph_end: paragraphEnd,
+                        script: 'Latn',
+                    }
+                })
+                    .then(response => setContent(response.data))
+                    .catch(error => console.error('Error fetching content:', error));
+            };
+
+            return (
+                <div className={`ml-${(item.level - 2) * 4}`}>
+                    <div
+                        className="flex justify-between items-center p-2 cursor-pointer hover:bg-gray-100"
+                        onClick={() => {
+                            setIsOpen(!isOpen);
+                            if (!content) fetchContent();
+                        }}
+                    >
+                        <span className="text-blue-600">{item.toc}</span>
+                        <span className="text-gray-600 text-sm">
+                            {item.chapter_len} paragraph{item.chapter_len > 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    {isOpen && content && (
+                        <div className="pl-4">
+                            {Object.entries(content).map(([paragraph, items]) => (
+                                <div key={paragraph} className="mb-4">
+                                    {items.map((item, index) => (
+                                        <div key={index} className="bg-white p-4 rounded shadow mb-2">
+                                            <p className="text-red-800">{item.sentence_content}</p>
+                                            {item.translation_content && (
+                                                <p className="text-blue-900">{item.translation_content}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [books, setBooks] = useState([]);
+            const [selectedBook, setSelectedBook] = useState(null);
+            const [channels, setChannels] = useState([]);
+
+            useEffect(() => {
+                axios.get('http://localhost:5000/api/books')
+                    .then(response => setBooks(response.data))
+                    .catch(error => console.error('Error fetching books:', error));
+            }, []);
+
+            const handleBookSelect = (bookId) => {
+                setSelectedBook(bookId);
+                axios.get(`http://localhost:5000/api/channels/${bookId}`)
+                    .then(response => setChannels(response.data))
+                    .catch(error => console.error('Error fetching channels:', error));
+            };
+
+            return (
+                <Layout>
+                    <h1 className="text-2xl font-bold text-center mb-6">Chattha Samgāyana Tipitaka</h1>
+                    <div className="bg-white p-6 rounded shadow mb-6">
+                        <h2 className="text-lg font-semibold mb-4">Select Book and Channel</h2>
+                        <div className="flex space-x-4">
+                            <select
+                                className="w-full p-2 border rounded"
+                                onChange={(e) => handleBookSelect(e.target.value)}
+                            >
+                                <option value="">Select a Book</option>
+                                {books.map(book => (
+                                    <option key={book.book_id} value={book.book_id}>
+                                        {book.book_name} ({book.lines_count} lines)
+                                    </option>
+                                ))}
+                            </select>
+                            <select className="w-full p-2 border rounded" disabled={!selectedBook}>
+                                <option value="">Select a Channel</option>
+                                {channels.map(channel => (
+                                    <option key={channel.id} value={channel.id}>
+                                        {channel.name} ({channel.lines_count} lines)
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </Layout>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>

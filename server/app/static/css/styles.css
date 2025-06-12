@@ -1,0 +1,205 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f8f9fa;
+    padding-top: 70px;
+}
+
+.navbar {
+    z-index: 1100;
+}
+
+.sidebar {
+    position: fixed;
+    top: 70px;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 20px;
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+    overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    width: 250px;
+}
+
+.sidebar.show,
+.sidebar.collapse.show {
+    transform: translateX(0);
+}
+
+.sidebar-sticky {
+    position: relative;
+    height: calc(100vh - 90px);
+}
+
+.main-content {
+    padding: 20px;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content.sidebar-open {
+    margin-left: 250px;
+}
+
+.toc-list {
+    padding-left: 0;
+}
+
+.toc-item {
+    padding: 8px 0;
+}
+
+.toc-item.level-3 {
+    padding-left: 20px;
+}
+
+.toc-item.level-4 {
+    padding-left: 40px;
+}
+
+.toc-toggle {
+    cursor: pointer;
+    margin-right: 8px;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+.toc-name {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.toc-name:hover {
+    text-decoration: underline;
+}
+
+.toc-info {
+    float: right;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.selection-controls {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.selection-controls {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.selection-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-right: 5px;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    background-color: #f5f5f5;
+}
+
+.tab.active {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.action-row {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.book-info {
+    margin-bottom: 20px;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #495057;
+}
+
+.info-value {
+    color: #212529;
+}
+
+.paragraph-container {
+    margin-bottom: 20px;
+}
+
+.pali-text {
+    color: #800000;
+    margin-bottom: 10px;
+}
+
+.translation-text {
+    color: #00008b;
+    margin-bottom: 0;
+}
+
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    padding: 10px;
+    color: #6c757d;
+}
+
+.no-results,
+.empty-block {
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.bi-chevron-right,
+.bi-chevron-down {
+    font-size: 0.8em;
+}
