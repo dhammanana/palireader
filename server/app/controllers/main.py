@@ -7,7 +7,6 @@ from app.models.toc_model import TocModel
 from app.services.translation_service import TranslationService
 from app.models.models import PaliText, db
 from sqlalchemy import and_
-import app
 
 main_bp = Blueprint('main', __name__)
 
@@ -97,7 +96,7 @@ def view_book(book_id, channel_id):
             })
 
         # Render the template
-        download_book_path = os.path.join(app.root_path, app.template_folder, 'download_book.html')
+        download_book_path = os.path.join(current_app.root_path, current_app.template_folder, 'download_book.html')
         html_content = render_template_string(
             open(download_book_path, encoding='utf-8').read(),
             book_name=book_name,
