@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, request
+import os
+import tempfile
+from flask import Blueprint, render_template, render_template_string, request, send_file
 from app.models.book_model import BookModel
 from app.models.channel_model import ChannelModel
+from app.models.toc_model import TocModel
 from app.services.translation_service import TranslationService
 from app.models.models import PaliText, db
 from sqlalchemy import and_
@@ -63,13 +66,65 @@ def index():
 @main_bp.route('/book/<book_id>/<channel_id>')
 def view_book(book_id, channel_id):
     """View book with table of contents and expandable content"""
+    channel2s = ChannelModel.get_channels({'name': 'Gemini-'})
     book = BookModel.get_book_by_id(book_id)
     channel = ChannelModel.get_channel_by_id(channel_id)
     channel2_id = request.args.get('channel2', '')
     script_lang = request.args.get('script', '')
-    print(type(channel), channel)
+    download = request.args.get('download', False)
+    if download:
+        # Handle download logic here
+        toc = TocModel.get_toc(book_id)
+        book_name = book['book_name'] if book else 'Unknown Book'
+        channel_name = channel['name'] if channel else 'Unknown Channel'
+        
+        # Prepare translations for each TOC entry
+        translations_by_toc = []
+        for item in toc:
+            paragraph_start = item['paragraph']
+            paragraph_end = paragraph_start + item['chapter_len'] - 1
+            translations = TranslationService.get_parsed_translations(
+                book_id, channel_id, paragraph_start, paragraph_end, channel2_id, script_lang or 'IAST'
+            )
+            translations_by_toc.append({
+                'toc': item['toc'],
+                'level': item['level'],
+                'paragraph': item['paragraph'],
+                'chapter_len': item['chapter_len'],
+                'translations': translations
+            })
+
+        # Render the template
+        html_content = render_template_string(
+            open('templates/download_book.html', encoding='utf-8').read(),
+            book_name=book_name,
+            channel_name=channel_name,
+            toc=toc,
+            translations_by_toc=translations_by_toc
+        )
+
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as temp_file:
+            temp_file.write(html_content)
+            temp_file_path = temp_file.name
+
+        # Send the file for download
+        try:
+            return send_file(
+                temp_file_path,
+                as_attachment=True,
+                download_name=f"{book_name.replace(' ', '_')}_{channel_name.replace(' ', '_')}.html",
+                mimetype='text/html'
+            )
+        finally:
+            # Clean up the temporary file
+            os.unlink(temp_file_path)
+        
+            
+            
     return render_template(
         'book.html',
+        channel2s = channel2s,
         book_id=book_id,
         channel_id=channel_id,
         book_name=book['book_name'] if book else 'Unknown Book',

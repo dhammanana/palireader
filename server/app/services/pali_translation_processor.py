@@ -11,6 +11,7 @@ from app.models.models import db, SentenceTranslation
 from app.models.sentence_model import SentenceModel
 from app.services.ai_generator import AiGenerator
 from app.utils.logger import get_logger
+from aksharamukha import transliterate
 
 logger = get_logger("assets/log/app.log", bold_numbers=True)
 
@@ -47,8 +48,7 @@ class PaliTranslationProcessor:
                     nissaya_data = json.loads(decoded_str)
                     
                     if 'pali' in nissaya_data and 'meaning' in nissaya_data:
-                        from app.services.scriptconvert import myanmar_to_roman
-                        roman = myanmar_to_roman(nissaya_data['pali'])
+                        roman = transliterate.process("Burmese", "IAST", nissaya_data['pali'])
                         nissaya_pairs.append({
                             'pali': roman,
                             'meaning': nissaya_data['meaning']
@@ -145,8 +145,7 @@ Input data:
                 decoded_str = decoded_bytes.decode('utf-8')
                 nissaya_data = json.loads(decoded_str)
                 
-                from app.services.scriptconvert import myanmar_to_roman
-                roman = myanmar_to_roman(nissaya_data.get('pali', ''))
+                roman = transliterate.process("Burmese", "IAST", nissaya_data.get('pali', ''), post_options=['SinhalaPali'])
                 
                 if roman != next_pair['pali']:
                     logger.warning(f"Correct misspelling: {roman} => {next_pair['pali']}")

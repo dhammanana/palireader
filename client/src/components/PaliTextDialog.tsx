@@ -20,7 +20,7 @@ interface PaliTextDialogProps {
 
 export default function PaliTextDialog({ tagKey, isOpen, onClose }: PaliTextDialogProps) {
     const [paliTextData, setPaliTextData] = useState<PaliTextItem[]>([]);
-    const router = useRouter(); // ✅ Add this
+    const router = useRouter();
 
     useEffect(() => {
         if (tagKey && isOpen) {

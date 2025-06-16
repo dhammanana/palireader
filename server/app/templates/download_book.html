@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ book_name }} ({{ channel_name }})</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+        }
+
+        .book-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+
+        .book-container h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .toc-item {
+            margin-left: calc(1.5rem * var(--level));
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            background-color: white;
+            padding: 0.75rem 1rem;
+        }
+
+        .toc-item a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .toc-item a:hover {
+            background-color: #e9ecef;
+        }
+
+        .paragraph-count {
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+
+        .paragraph-container {
+            position: relative;
+            border-left: 4px solid #4a90e2;
+            padding-left: 5px;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            margin-bottom: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .pali-text {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .translation-text {
+            color: #555;
+        }
+
+        .translation2-text {
+            color: #07922a;
+            margin-top: 0.5rem;
+        }
+
+        .paragraph-number {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="book-container">
+        <h1>{{ book_name }} ({{ channel_name }})</h1>
+        <h2>Table of Contents</h2>
+        <div class="toc">
+            {% for item in toc %}
+            <div class="toc-item" style="--level: {{ item.level - 2 }}">
+                <a href="#para-{{ item.paragraph }}">{{ item.toc }}</a>
+                <span class="paragraph-count">{{ item.chapter_len }} paragraph{{ 's' if item.chapter_len > 1 else ''
+                    }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <h2>Content</h2>
+        {% for toc_item in translations_by_toc %}
+        <h3>{{ toc_item.toc }}</h3>
+        {% for paragraph, items in toc_item.translations.items() %}
+        <div class="paragraph-container" id="para-{{ paragraph }}">
+            {% for item in items %}
+            <div class="card">
+                <div class="card-body">
+                    <p class="pali-text">{{ item.sentence_content }}</p>
+                    {% if item.translation_content_2 %}
+                    <p class="translation2-text">{{ item.translation_content_2 }}</p>
+                    {% endif %}
+                    {% if item.translation_content %}
+                    <p class="translation-text">{{ item.translation_content }}</p>
+                    {% endif %}
+                    {% if loop.first %}
+                    <div class="paragraph-number">{{ paragraph }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</body>
+
+</html>

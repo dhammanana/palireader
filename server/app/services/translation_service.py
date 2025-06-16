@@ -1,16 +1,16 @@
 import json
 import base64
 import re
-from .scriptconvert import roman_to_sinhala, TextProcessor, Script
 from .compare import highlight_words_in_sentence
 from app.models.sentence_model import SentenceModel
 from app.utils.logger import get_logger
+from aksharamukha import transliterate
 
 logger = get_logger("assets/log/app.log", bold_numbers=True)
 
 class TranslationService:
     @staticmethod
-    def get_nissaya_list(content, script_lang = Script.RO):
+    def get_nissaya_list(content, script_lang = "IAST"):
 
         """Parse the nissaya content from the specified format"""
         if not content:
@@ -32,12 +32,14 @@ class TranslationService:
                     
                     if 'pali' in nissaya_data and 'meaning' in nissaya_data:
                         if 'lang' in nissaya_data and nissaya_data['lang'] == 'my':
-                            converted = TextProcessor.convert_to_sinh(nissaya_data['pali'], Script.MY)
+                            converted = transliterate.process("Burmese", "Sinhala", nissaya_data['pali'])
                         elif 'lang' in nissaya_data and (nissaya_data['lang'] == 'ro' or nissaya_data['lang'] == 'en' or nissaya_data['lang'] == 'vi'):
-                            converted = roman_to_sinhala(nissaya_data['pali'])
+                            converted = transliterate.process('IAST', 'Sinhala', nissaya_data['pali'], post_options=['SinhalaPali'])
+                            
 
-                        if script_lang != Script.SI:
-                            converted = TextProcessor.convert_from_sinh(converted, script_lang)
+                        if script_lang != "Sinhala":
+                            converted = transliterate.process('Sinhala', script_lang,  converted, pre_options=['SinhalaPali'])
+                        
                         parsed_output.append(f"{converted}={nissaya_data['meaning']}")
                         output.append([converted, nissaya_data['meaning']])
                 
@@ -47,7 +49,7 @@ class TranslationService:
         return output
 
     @staticmethod
-    def get_parsed_translations(book_id, channel_id, paragraph_start=None, paragraph_end=None, channel_id_2=None, script_lang=Script.RO):
+    def get_parsed_translations(book_id, channel_id, paragraph_start=None, paragraph_end=None, channel_id_2=None, script_lang="IAST"):
         """Get and parse all translations with their sentences for a specific book and channel"""
         results = []
         if channel_id_2:
@@ -64,14 +66,17 @@ class TranslationService:
             paragraph = row['paragraph']
             word_start = row['word_start']
             word_end = row['word_end']
+
             
-            if script_lang == Script.SI:
-                sentence_content = roman_to_sinhala(sentence_content)
-            elif script_lang == Script.RO:
-                pass
+            
+            if script_lang == "Sinhala":
+                sentence_content = transliterate.process('IAST', script_lang, sentence_content, post_options=['SinhalaPali'])
+            elif script_lang == "Thai":
+                sentence_content = transliterate.process('IAST', script_lang, sentence_content, post_options=['ThaiOrthography'])
+            elif script_lang == "RussianCyrillic":
+                sentence_content = transliterate.process('IAST', script_lang, sentence_content, post_options=['CyrillicPali'])
             else:
-                sentence_content = roman_to_sinhala(sentence_content)
-                sentence_content = TextProcessor.convert_from_sinh(sentence_content, script_lang)
+                sentence_content = transliterate.process('IAST', script_lang, sentence_content)
 
             if translation_content and '{{nissaya|' in translation_content:
                 nissaya = TranslationService.get_nissaya_list(translation_content, script_lang)

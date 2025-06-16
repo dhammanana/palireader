@@ -21,7 +21,7 @@ export default function TOCItem({ item, channelId, channel2Id, bookId }: TOCItem
   const fetchContent = () => {
     const paragraphEnd = parseInt(String(item.paragraph)) + (item.chapter_len || 1) - 1;
     axios.get(`http://localhost:5000/api/toc/content/${bookId}/${channelId}`, {
-      params: { paragraph_start: item.paragraph, paragraph_end: paragraphEnd, script: 'Latn', channel2: channel2Id },
+      params: { paragraph_start: item.paragraph, paragraph_end: paragraphEnd, script: 'IAST', channel2: channel2Id },
     }).then(res => setContent(res.data));
   };
 

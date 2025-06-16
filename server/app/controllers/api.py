@@ -4,7 +4,6 @@ from app.models.channel_model import ChannelModel
 from app.models.sentence_model import SentenceModel
 from app.models.tag_model import TagModel
 from app.models.toc_model import TocModel
-from app.services.scriptconvert import SCRIPT_LANG
 from app.services.translation_service import TranslationService
 import json
 
@@ -13,6 +12,13 @@ api_bp = Blueprint('api', __name__)
 @api_bp.route('/menu')
 def get_menu():
     with open('assets/menu.json', encoding="utf8") as f:
+        data = json.load(f)
+        return jsonify(data)
+    return jsonify({})
+
+@api_bp.route('/sidebar')
+def get_sidebar():
+    with open('assets/sidebar.json', encoding="utf8") as f:
         data = json.load(f)
         return jsonify(data)
     return jsonify({})
@@ -63,12 +69,6 @@ def get_translations():
     return jsonify(translations)
 
 
-@api_bp.route('/toc/<book_id>')
-def get_toc(book_id):
-    """API endpoint to get table of contents for a selected book"""
-    toc = TocModel.get_toc(book_id)
-    return jsonify(toc)
-
 @api_bp.route('/palitext')
 def search_pali_text():
     """API endpoint to search chapters by tags"""
@@ -83,9 +83,13 @@ def search_pali_text():
         return jsonify({"status":"success", "data": results, "count": len(results)})
     else:
         return jsonify({"status":"error", "error": "Not yet implemented"}), 400
-    
-   
-    
+
+
+@api_bp.route('/toc/<book_id>')
+def get_toc(book_id):
+    """API endpoint to get table of contents for a selected book"""
+    toc = TocModel.get_toc(book_id)
+    return jsonify(toc)    
 
 @api_bp.route('/toc/content/<book_id>/<channel_id>')
 def get_toc_content(book_id, channel_id):
@@ -96,9 +100,8 @@ def get_toc_content(book_id, channel_id):
     channel2_id = request.args.get('channel2', type=str)
 
     script_lang_name = request.args.get('script', type=str)
-    script_lang = SCRIPT_LANG['Latn']
-    if script_lang_name in SCRIPT_LANG:
-        script_lang = SCRIPT_LANG[script_lang_name]
+    script_lang = script_lang_name or "IAST"  # Default script language
+
 
     content = TranslationService.get_parsed_translations(book_id, channel_id, paragraph_start, paragraph_end, channel2_id, script_lang)
     

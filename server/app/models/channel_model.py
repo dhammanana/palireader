@@ -19,6 +19,25 @@ class ChannelModel:
                 'name': f"Channel {channel_id}"
             }
         return ret
+
+    @staticmethod
+    def get_channels(kwargs):
+        """Get channels by name, type, and/or language"""
+        query = db.session.query(Channel.id, Channel.name)
+
+        filters = []
+        if 'name' in kwargs:
+            filters.append(Channel.name.ilike(f"%{kwargs['name']}%"))
+        if 'type' in kwargs:
+            filters.append(Channel.type == kwargs['type'])
+        if 'language' in kwargs:
+            filters.append(Channel.language == kwargs['language'])
+
+        if filters:
+            query = query.filter(and_(*filters))
+
+        results = query.all()
+        return [{'id': r.id, 'name': r.name} for r in results]
     
     @staticmethod
     def get_all_channels_with_counts():

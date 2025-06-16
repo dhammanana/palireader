@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import and_, func, or_
 from sqlalchemy.sql import exists
 from app.models.models import Channel, PaliText, db, Sentence, SentenceTranslation
@@ -51,10 +52,16 @@ class SentenceModel:
             'paragraph': sentence.paragraph,
             'word_start': sentence.word_start,
             'word_end': sentence.word_end,
-            'sentence_content': sentence.sentence_content,
+            'sentence_content': SentenceModel.remove_quote(sentence.sentence_content),
             'translation_content': sentence.translation_content
         } for sentence in sentences]
 
+    @staticmethod
+    def remove_quote(sentence, remove=True):
+        """Remove quotes from a sentence content"""
+        if remove:
+            return re.sub(r'[A-Z]\d+\.\d+', '', sentence)
+        return sentence
     @staticmethod
     def get_dual_translations_with_sentences(book_id, channel_id_1, channel_id_2, paragraph_start=None, paragraph_end=None):
         """Get sentences with translations from two channels for a book"""
@@ -125,7 +132,7 @@ class SentenceModel:
             'paragraph': sentence.paragraph,
             'word_start': sentence.word_start,
             'word_end': sentence.word_end,
-            'sentence_content': sentence.sentence_content,
+            'sentence_content': SentenceModel.remove_quote(sentence.sentence_content),
             'translation_content': sentence.translation_content_1 or "",
             'translation_content_2': sentence.translation_content_2 or ""
         } for sentence in sentences]

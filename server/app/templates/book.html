@@ -15,42 +15,44 @@
     <div class="book-container">
         <h1>{{ book_name }} ({{ channel_name }})</h1>
         <div class="row mb-4">
-            <div class="col-md-4">
+            <div class="col-sm-12 col-md-4 col-lg-3 col-xl-3">
                 <select id="bookSelect" class="form-select select2" style="width: 100%;">
                     <option value="">Select a book</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2">
                 <select id="scriptSelect" class="form-select">
                     <option value="">Select script</option>
-                    <option value="Sinh">Sinhala</option>
-                    <option value="Deva">Devanagari</option>
-                    <option value="Latn">Roman/Latin</option>
+                    <option value="Sinhala">Sinhala</option>
+                    <option value="Devanagari">Devanagari</option>
+                    <option value="IAST">Roman/Latin</option>
                     <option value="Thai">Thai</option>
-                    <option value="Laoo">Lao</option>
-                    <option value="Mymr">Myanmar</option>
-                    <option value="Khmr">Khmer</option>
-                    <option value="Beng">Bengali</option>
-                    <option value="Guru">Gurmukhi</option>
-                    <option value="Lana">Tai Tham</option>
-                    <option value="Gujr">Gujarati</option>
-                    <option value="Telu">Telugu</option>
-                    <option value="Knda">Kannada</option>
-                    <option value="Mlym">Malayalam</option>
-                    <option value="Brah">Brahmi</option>
-                    <option value="Tibt">Tibetan</option>
-                    <option value="Cyrl">Cyrillic</option>
+                    <option value="LaoPali">Lao</option>
+                    <option value="Burmese">Myanmar</option>
+                    <option value="Khmer">Khmer</option>
+                    <option value="Bengali">Bengali</option>
+                    <option value="Gurmukhi">Gurmukhi</option>
+                    <option value="TaiTham">Tai Tham</option>
+                    <option value="Gujarati">Gujarati</option>
+                    <option value="Telugu">Telugu</option>
+                    <option value="Kannada">Kannada</option>
+                    <option value="Malayalam">Malayalam</option>
+                    <option value="Brahmi">Brahmi</option>
+                    <option value="Tibetan">Tibetan</option>
+                    <option value="RussianCyrillic">Cyrillic</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-sm-12 col-md-3 col-lg-2 col-xl-2">
                 <select id="channelSelect" class="form-select">
                     <option value="">Select translation</option>
-                    <option value="652033bb-8cc0-4399-bf73-35c1d709cffa">Gemini Bhāsāṭīka Literal Translation</option>
-                    <option value="55dfe318-59e6-4c48-bba8-bd6b293af2df">Gemini Bhāsāṭīka Free Translation</option>
+                    {% for channel in channel2s %}
+                    <option value="{{ channel.id }}">{{ channel.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-md-2">
-                <button id="submitButton" class="btn btn-primary w-100">Submit</button>
+                <button id="submitButton" class="btn btn-primary w-100 p-0">Read</button>
+                <button id="downloadButton" class="btn btn-outline-primary w-100 mt-1 p-0">Download</button>
             </div>
         </div>
         <div id="toc-list"></div>
@@ -85,12 +87,27 @@
             const channel2FromUrl = getQueryParam('channel2') || channel2Id;
 
             // Fetch books from API and populate book combobox
-            $.getJSON('http://localhost:5000/api/books/7a9b2e4f-6d8c-4b1a-9e3f-82c4d7f105a9', function (data) {
+            $.getJSON('http://localhost:5000/api/books/' + channelId, function (data) {
                 $.each(data, function (index, book) {
                     $('#bookSelect').append(
                         $('<option>', {
                             value: book.book,
                             text: book.name
+                        })
+                    );
+                });
+                // Set book selection from URL if available
+                if (bookFromUrl) {
+                    $('#bookSelect').val(bookFromUrl).trigger('change');
+                }
+            });
+
+            $.getJSON('http://localhost:5000/api/books/' + channelId, function (data) {
+                $.each(data, function (index, book) {
+                    $('#bookSelect').append(
+                        $('<option>', {
+                            value: book.book,
+                            text: "VN-" + book.name
                         })
                     );
                 });
@@ -117,7 +134,20 @@
                 const channel2Id = $('#channelSelect').val();
 
                 if (bookId && scriptId && channel2Id) {
-                    const url = `/book/${bookId}/7a9b2e4f-6d8c-4b1a-9e3f-82c4d7f105a9?script=${scriptId}&channel2=${channel2Id}`;
+                    const url = `/book/${bookId}/${channelId}?script=${scriptId}&channel2=${channel2Id}`;
+                    window.location.href = url;
+                } else {
+                    alert('Please select a book, script, and translation.');
+                }
+            });
+
+            $('#downloadButton').click(function () {
+                const bookId = $('#bookSelect').val();
+                const scriptId = $('#scriptSelect').val();
+                const channel2Id = $('#channelSelect').val();
+
+                if (bookId && scriptId && channel2Id) {
+                    const url = `/book/${bookId}/${channelId}?script=${scriptId}&channel2=${channel2Id}&download=true`;
                     window.location.href = url;
                 } else {
                     alert('Please select a book, script, and translation.');

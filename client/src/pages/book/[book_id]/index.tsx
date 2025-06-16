@@ -15,7 +15,7 @@ export default function BookContentPage() {
     useEffect(() => {
         if (book_id && paragraph && length) {
             const paragraph_end = paragraph + length;
-            const url = `http://localhost:5000/api/toc/content/${book_id}/7a9b2e4f-6d8c-4b1a-9e3f-82c4d7f105a9?paragraph_start=${paragraph}&paragraph_end=${paragraph_end}&script=Latn&channel2=`;
+            const url = `http://localhost:5000/api/toc/content/${book_id}/7a9b2e4f-6d8c-4b1a-9e3f-82c4d7f105a9?paragraph_start=${paragraph}&paragraph_end=${paragraph_end}&script=IAST&channel2=`;
 
             axios.get(url)
                 .then(res => {
