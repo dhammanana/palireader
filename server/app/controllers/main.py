@@ -1,12 +1,13 @@
 import os
 import tempfile
-from flask import Blueprint, render_template, render_template_string, request, send_file
+from flask import Blueprint, current_app, render_template, render_template_string, request, send_file
 from app.models.book_model import BookModel
 from app.models.channel_model import ChannelModel
 from app.models.toc_model import TocModel
 from app.services.translation_service import TranslationService
 from app.models.models import PaliText, db
 from sqlalchemy import and_
+import app
 
 main_bp = Blueprint('main', __name__)
 
@@ -66,6 +67,7 @@ def index():
 @main_bp.route('/book/<book_id>/<channel_id>')
 def view_book(book_id, channel_id):
     """View book with table of contents and expandable content"""
+    
     channel2s = ChannelModel.get_channels({'name': 'Gemini-'})
     book = BookModel.get_book_by_id(book_id)
     channel = ChannelModel.get_channel_by_id(channel_id)
@@ -95,8 +97,9 @@ def view_book(book_id, channel_id):
             })
 
         # Render the template
+        download_book_path = os.path.join(app.root_path, app.template_folder, 'download_book.html')
         html_content = render_template_string(
-            open('templates/download_book.html', encoding='utf-8').read(),
+            open(download_book_path, encoding='utf-8').read(),
             book_name=book_name,
             channel_name=channel_name,
             toc=toc,
